@@ -207,6 +207,34 @@ nav a:hover{
     position:relative;
 }
 
+.project-nav{
+    padding:30px 8%;
+}
+
+.project-nav ul{
+    display:flex;
+    flex-wrap:wrap;
+    gap:18px;
+    list-style:none;
+}
+
+.project-nav li{
+    background:rgba(30,41,59,.9);
+    border:1px solid rgba(56,189,248,.2);
+    border-radius:999px;
+    padding:10px 18px;
+}
+
+.project-nav a{
+    color:#7dd3fc;
+    text-decoration:none;
+    font-weight:600;
+}
+
+.project-nav a:hover{
+    color:#ffffff;
+}
+
 .section.section-alt{
     background:rgba(255,255,255,.02);
     border-top:1px solid rgba(255,255,255,.06);
