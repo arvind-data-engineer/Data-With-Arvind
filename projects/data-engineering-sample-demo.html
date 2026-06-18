@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Demo page for the retail sales ETL sample project, including sample data and Python transformation code.">
-<title>Data Engineering Sample Demo | Data With Arvind</title>
+<title>Retail ETL Sample Project | Data With Arvind</title>
 <link rel="stylesheet" href="../css/style.css">
 </head>
 
@@ -16,7 +16,7 @@
 <li><a href="../index.html">Home</a></li>
 <li><a href="../services.html">Services</a></li>
 <li><a href="../portfolio.html">Portfolio</a></li>
-<li><a href="index.html">Project Hub</a></li>
+<li><a href="index.html">Projects</a></li>
 <li><a href="../about.html">About</a></li>
 <li><a href="../contact.html">Contact</a></li>
 <li><a href="../blog.html">Blog</a></li>
@@ -26,15 +26,15 @@
 <main>
 <section class="page-header portfolio-header">
 <span class="section-kicker">Sample Project</span>
-<h1>Retail Sales ETL Demo</h1>
+<h1>Retail ETL Sample Project</h1>
 <p>Practical sample assets for the retail sales data engineering case study: source files, ETL script, and output datasets.</p>
 </section>
 <section class="section project-nav" aria-label="Project navigation">
 <ul>
-<li><a href="../projects/sales-dashboard.html">Sales Dashboard</a></li>
+<li><a href="../projects/sales-dashboard.html">Sales Performance Dashboard</a></li>
 <li><a href="../projects/hr-dashboard.html">HR Analytics Dashboard</a></li>
-<li><a href="../projects/python-automation.html">Python Automation</a></li>
-<li><a href="../projects/data-engineering-case-study.html">Data Engineering Case Study</a></li>
+<li><a href="../projects/python-automation.html">Python Reporting Automation</a></li>
+<li><a href="../projects/data-engineering-case-study.html">Retail Data Engineering Pipeline</a></li>
 </ul>
 <a href="../portfolio.html" class="btn-secondary">Back to Portfolio</a>
 </section>
@@ -43,10 +43,10 @@
 <span class="section-kicker">Project Folder</span>
 <h2 id="detail-title">What you will see in the sample project</h2>
 <ul>
-<li><strong>sample_data/sales.csv</strong> — raw sales transactions with order, product, and pricing details</li>
-<li><strong>sample_data/products.csv</strong> — product master data and category mappings</li>
-<li><strong>ingest_and_transform.py</strong> — Python ETL script for ingestion, validation, transformation, and output generation</li>
-<li><strong>output/</strong> — target folder for cleaned `fact_sales.csv` and `sales_summary_by_category.csv`</li>
+<li><strong>sample_data/sales.csv</strong> - raw sales transactions with order, product, and pricing details</li>
+<li><strong>sample_data/products.csv</strong> - product master data and category mappings</li>
+<li><strong>ingest_and_transform.py</strong> - Python ETL script for ingestion, validation, transformation, and output generation</li>
+<li><strong>output/</strong> - target folder for cleaned `fact_sales.csv` and `sales_summary_by_category.csv`</li>
 </ul>
 </section>
 
@@ -58,8 +58,8 @@
 python ingest_and_transform.py</pre>
 <p>The script writes two files into `projects/data-engineering-sample/output/`:</p>
 <ul>
-<li><strong>fact_sales.csv</strong> — cleaned and enriched sales fact data</li>
-<li><strong>sales_summary_by_category.csv</strong> — aggregated revenue summary by category</li>
+<li><strong>fact_sales.csv</strong> - cleaned and enriched sales fact data</li>
+<li><strong>sales_summary_by_category.csv</strong> - aggregated revenue summary by category</li>
 </ul>
 </section>
 

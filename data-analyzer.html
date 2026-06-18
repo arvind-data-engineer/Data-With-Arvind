@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Upload CSV datasets to preview cleaning, relationship analysis, KPIs, charts, and decision-ready data insights.">
+<title>Data Analyzer | Data With Arvind</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<nav aria-label="Primary navigation">
+<a class="logo" href="index.html">Data With Arvind</a>
+
+<ul>
+<li><a href="index.html">Home</a></li>
+<li><a href="services.html">Services</a></li>
+<li><a href="portfolio.html">Portfolio</a></li>
+<li><a href="projects/index.html">Projects</a></li>
+<li><a href="about.html">About</a></li>
+<li><a href="contact.html">Contact</a></li>
+<li><a href="blog.html">Blog</a></li>
+</ul>
+</nav>
+
+<main>
+
+<section class="page-header analyzer-header">
+<span class="section-kicker">Dataset Analysis Tool</span>
+<h1>Upload CSV Files And Get A Fast Static Preview</h1>
+<p>
+Check data quality, clean messy rows, find relationships between datasets, and generate basic browser-side charts before moving into a full Power BI or paid analysis build.
+</p>
+</section>
+
+<section class="section live-demo-section analyzer-workspace" aria-labelledby="live-demo-title">
+<div class="analyzer-command-bar">
+<div>
+<span class="section-kicker">Static Free Preview</span>
+<h2 id="live-demo-title">CSV Cleaning, Relationship Checks, KPIs, And Charts</h2>
+</div>
+<div class="dataset-actions">
+<label class="csv-upload-control" for="csv-upload">Choose CSV Files</label>
+<input id="csv-upload" type="file" accept=".csv,text/csv" multiple>
+<button type="button" class="btn-secondary live-demo-button" id="run-live-demo">Analyze Sample</button>
+</div>
+</div>
+
+<div class="dataset-workflow" aria-label="Dataset workflow stages">
+<button type="button" class="workflow-step is-active" data-stage-button="upload"><span>01</span><strong>Upload</strong><small>Select CSV files</small></button>
+<button type="button" class="workflow-step" data-stage-button="clean"><span>02</span><strong>Clean</strong><small>Raw vs cleaned data</small></button>
+<button type="button" class="workflow-step" data-stage-button="relationship"><span>03</span><strong>Relationships</strong><small>Keys and quality</small></button>
+<button type="button" class="workflow-step" data-stage-button="chart"><span>04</span><strong>Charts</strong><small>KPIs and visuals</small></button>
+</div>
+
+<div class="analysis-overview-grid data-stage-panel" data-stage-panel="upload" aria-label="Analysis preview summary">
+<article class="analysis-overview-card">
+<span>Files Checked</span>
+<strong id="analysis-files">--</strong>
+<small>Upload status and source count</small>
+</article>
+<article class="analysis-overview-card">
+<span>Dataset Shape</span>
+<strong id="analysis-shape">--</strong>
+<small>Rows and columns detected</small>
+</article>
+<article class="analysis-overview-card">
+<span>Chart Readiness</span>
+<strong id="analysis-chart-ready">--</strong>
+<small>Needs category and numeric fields</small>
+</article>
+</div>
+
+<div class="analyzer-shell">
+<div class="live-demo-panel card data-stage-panel" data-stage-panel="clean" hidden>
+<div class="live-demo-topline">
+<div>
+<span>CSV Preview Engine</span>
+<strong id="live-demo-status">Preview Ready</strong>
+</div>
+</div>
+
+<div class="dataset-tables">
+<div class="preview-table-card raw-preview-card">
+<h3>Raw Preview</h3>
+<div class="table-scroll">
+<table class="demo-table">
+<thead>
+<tr id="raw-data-head"></tr>
+</thead>
+<tbody id="raw-data-table"></tbody>
+</table>
+</div>
+</div>
+
+<div class="preview-table-card cleaned-preview-card">
+<h3>Cleaned Preview</h3>
+<div class="table-scroll">
+<table class="demo-table">
+<thead>
+<tr id="clean-data-head"></tr>
+</thead>
+<tbody id="clean-data-table"></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div class="ai-insight-panel">
+<div class="ai-insight-heading">
+<span>Static Analysis Output</span>
+<strong id="ai-quality-score">Quality score: --</strong>
+</div>
+<ul id="ai-insights">
+<li>Upload one or more CSV files to generate a browser-side cleaning, relationship, KPI, and dashboard preview.</li>
+</ul>
+</div>
+
+<div class="decision-brief-panel">
+<div class="decision-brief-heading">
+<span>Decision Brief</span>
+<strong id="decision-readiness">Readiness: --</strong>
+</div>
+<div class="decision-grid">
+<div>
+<span>Opportunity</span>
+<strong id="decision-opportunity">Upload data to identify the strongest segment.</strong>
+</div>
+<div>
+<span>Risk</span>
+<strong id="decision-risk">Quality risks will appear after analysis.</strong>
+</div>
+<div>
+<span>Next Action</span>
+<strong id="decision-action">Run analysis to get recommended action.</strong>
+</div>
+</div>
+</div>
+
+<div class="ai-assistant-panel">
+<div class="ai-assistant-heading">
+<div>
+<span>Ask Preview Assistant</span>
+<strong>Question the static CSV summary</strong>
+</div>
+<small>Answers use browser-side summaries only; no server AI is connected.</small>
+</div>
+<div class="ai-suggestion-row" aria-label="Suggested analysis questions">
+<button type="button" class="ai-question-chip" data-question="What are the key insights?">Key insights</button>
+<button type="button" class="ai-question-chip" data-question="What risks should I fix first?">Data risks</button>
+<button type="button" class="ai-question-chip" data-question="Which segment is performing best?">Best segment</button>
+<button type="button" class="ai-question-chip" data-question="What should I do next?">Next action</button>
+</div>
+<div class="ai-chat-window" id="ai-chat-window" aria-live="polite">
+<div class="ai-message ai-message-assistant">
+<span>Preview Assistant</span>
+<p>Upload a CSV or run the sample, then ask about trends, quality issues, relationships, KPIs, or next actions from the static summary.</p>
+</div>
+</div>
+<form class="ai-chat-form" id="ai-chat-form">
+<input id="ai-question-input" type="text" placeholder="Ask: Which category is driving performance?" autocomplete="off">
+<button type="submit" class="btn-primary">Ask</button>
+</form>
+</div>
+</div>
+
+<aside class="live-demo-metrics data-stage-panel" data-stage-panel="relationship" hidden aria-label="Dataset analysis metrics">
+<article class="card live-metric-card">
+<span>Clean Rows</span>
+<strong id="live-revenue">0/0</strong>
+<small>Duplicate and blank rows handled</small>
+</article>
+
+<article class="card live-metric-card">
+<span>Columns Detected</span>
+<strong id="live-forecast">0</strong>
+<small>Numeric, date, and category fields inferred</small>
+</article>
+
+<article class="card live-metric-card">
+<span>Top Relationship</span>
+<strong id="live-anomaly">-</strong>
+<small>Strongest pattern found inside the dataset</small>
+</article>
+
+<article class="card dataset-relationship-card">
+<span>Dataset Relationships</span>
+<strong id="dataset-relationship-count">--</strong>
+<small id="dataset-relationship-summary">Upload multiple CSV files to detect shared keys and value overlap.</small>
+</article>
+</aside>
+</div>
+
+<section class="analyzer-dashboard-grid data-stage-panel" data-stage-panel="chart" hidden aria-label="Generated analysis dashboard">
+<article class="card dashboard-card-mini">
+<div class="chart-card-heading">
+<div>
+<span>Auto Chart</span>
+<strong id="dashboard-chart-title">Top categories by selected value</strong>
+</div>
+<small id="dashboard-chart-summary">Run analysis to generate a visual summary.</small>
+</div>
+<div class="chart-stat-row" aria-label="Auto chart summary">
+<div>
+<span>Top Segment</span>
+<strong id="chart-top-segment">--</strong>
+</div>
+<div>
+<span>Visible Total</span>
+<strong id="chart-visible-total">--</strong>
+</div>
+</div>
+<canvas id="dataset-dashboard-chart" width="620" height="300" aria-label="Auto-generated dataset dashboard chart"></canvas>
+<div class="dashboard-bars" id="dataset-dashboard-bars" aria-label="Auto-generated dashboard bars"></div>
+</article>
+
+<article class="card chart-kpi-card">
+<span>Total Value</span>
+<strong id="chart-kpi-total">--</strong>
+<small>Sum of visible chart segments</small>
+</article>
+
+<article class="card chart-kpi-card">
+<span>Average Segment</span>
+<strong id="chart-kpi-average">--</strong>
+<small>Average value per displayed segment</small>
+</article>
+
+<article class="card chart-kpi-card">
+<span>Best Segment Share</span>
+<strong id="chart-kpi-share">--</strong>
+<small>Top segment contribution</small>
+</article>
+
+<article class="card model-output-card">
+<span>Trend Preview</span>
+<strong id="model-forecast">Not enough data yet</strong>
+<small id="model-anomalies">Outliers: --</small>
+<small id="model-confidence">Reliability: --</small>
+</article>
+
+<article class="card quality-audit-card">
+<span>Quality Audit</span>
+<div class="quality-row">
+<small>Completeness</small>
+<strong id="quality-completeness">--</strong>
+</div>
+<div class="quality-row">
+<small>Duplicates</small>
+<strong id="quality-duplicates">--</strong>
+</div>
+<div class="quality-row">
+<small>Analysis Ready</small>
+<strong id="quality-model-ready">--</strong>
+</div>
+</article>
+
+<article class="card pbi-kpi-card">
+<span>Power BI Style KPI</span>
+<div class="quality-row">
+<small>Latest Month</small>
+<strong id="pbi-latest-month">--</strong>
+</div>
+<div class="quality-row">
+<small>Monthly KPI</small>
+<strong id="pbi-monthly-kpi">--</strong>
+</div>
+<div class="quality-row">
+<small>MoM Change</small>
+<strong id="pbi-mom-change">--</strong>
+</div>
+<div class="quality-row">
+<small>Avg Monthly</small>
+<strong id="pbi-average-monthly">--</strong>
+</div>
+</article>
+
+<article class="card paid-analysis-card analyzer-paid-card">
+<span>Need Deeper Analysis?</span>
+<strong>Paid Version</strong>
+<small>Full Power BI dashboard design, business rules, analyst summaries, data model planning, and export-ready report pages.</small>
+<a href="contact.html" class="text-link">Request advanced analysis</a>
+</article>
+</section>
+</section>
+
+</main>
+
+<a class="whatsapp-float" href="https://wa.me/918897676921" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+WA
+</a>
+
+<script src="js/live-analytics.js" defer></script>
+</body>
+</html>
