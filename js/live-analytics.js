@@ -80,7 +80,7 @@ function setWorkflowStage(stage) {
   });
 }
 
-function parseCsv(text) {
+function parseDelimited(text, delimiter = ',') {
   const rows = [];
   let row = [];
   let cell = '';
@@ -95,7 +95,7 @@ function parseCsv(text) {
       index += 1;
     } else if (char === '"') {
       inQuotes = !inQuotes;
-    } else if (char === ',' && !inQuotes) {
+    } else if (char === delimiter && !inQuotes) {
       row.push(cell);
       cell = '';
     } else if ((char === '\n' || char === '\r') && !inQuotes) {
@@ -121,6 +121,52 @@ function parseCsv(text) {
   return { headers, records };
 }
 
+function parseCsv(text) {
+  return parseDelimited(text, ',');
+}
+
+function parseTsv(text) {
+  return parseDelimited(text, '\t');
+}
+
+function normalizeJsonRecord(value) {
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    return Object.entries(value).reduce((record, [key, item]) => {
+      record[key] = item && typeof item === 'object' ? JSON.stringify(item) : item ?? '';
+      return record;
+    }, {});
+  }
+
+  return { value: value ?? '' };
+}
+
+function parseJsonDataset(text) {
+  const parsed = JSON.parse(text);
+  const rows = Array.isArray(parsed)
+    ? parsed
+    : Object.values(parsed).find(value => Array.isArray(value)) || [parsed];
+  const records = rows.map(normalizeJsonRecord);
+  const headers = Array.from(new Set(records.flatMap(record => Object.keys(record))));
+
+  return {
+    headers,
+    records: records.map(record => headers.reduce((normalizedRecord, header) => {
+      normalizedRecord[header] = record[header] ?? '';
+      return normalizedRecord;
+    }, {})),
+  };
+}
+
+function parseExcelDataset(workbook) {
+  const sheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[sheetName];
+  const rows = window.XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+  const records = rows.map(normalizeJsonRecord);
+  const headers = Array.from(new Set(records.flatMap(record => Object.keys(record))));
+
+  return { headers, records };
+}
+
 function combineDatasets(datasets) {
   if (datasets.length === 1) return datasets[0];
 
@@ -142,19 +188,57 @@ function combineDatasets(datasets) {
   };
 }
 
-function readCsvFile(file) {
+function readAsText(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => {
-      const parsedDataset = parseCsv(String(reader.result || '').replace(/^\uFEFF/, ''));
-      resolve({
-        name: file.name,
-        ...parsedDataset,
-      });
-    };
+    reader.onload = () => resolve(String(reader.result || '').replace(/^\uFEFF/, ''));
     reader.onerror = () => reject(new Error(`Could not read ${file.name}`));
     reader.readAsText(file);
   });
+}
+
+function readAsArrayBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error(`Could not read ${file.name}`));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+async function readDataFile(file) {
+  const fileName = file.name.toLowerCase();
+
+  if (fileName.endsWith('.json')) {
+    return {
+      name: file.name,
+      ...parseJsonDataset(await readAsText(file)),
+    };
+  }
+
+  if (fileName.endsWith('.tsv')) {
+    return {
+      name: file.name,
+      ...parseTsv(await readAsText(file)),
+    };
+  }
+
+  if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+    if (!window.XLSX) {
+      throw new Error('Excel parser is not available');
+    }
+
+    const workbook = window.XLSX.read(await readAsArrayBuffer(file), { type: 'array' });
+    return {
+      name: file.name,
+      ...parseExcelDataset(workbook),
+    };
+  }
+
+  return {
+    name: file.name,
+    ...parseCsv(await readAsText(file)),
+  };
 }
 
 function normalizeValue(value) {
@@ -329,7 +413,7 @@ function renderTable(headElement, bodyElement, headers, records, status = false)
   if (status) headElement.innerHTML += '<th>Status</th>';
 
   if (!records.length) {
-    const message = status ? 'Upload a CSV or analyze the sample to generate cleaned output.' : 'No rows available.';
+    const message = status ? 'Upload a data file or analyze the sample to generate cleaned output.' : 'No rows available.';
     bodyElement.innerHTML = `<tr><td colspan="${visibleHeaders.length + (status ? 1 : 0)}">${message}</td></tr>`;
     return;
   }
@@ -610,7 +694,7 @@ function drawDashboard(chartData) {
   context.fillText(chartData.length ? 'Segment Performance' : 'Upload data to build chart', padding, 28);
   context.fillStyle = '#94a3b8';
   context.font = '12px Segoe UI, sans-serif';
-  context.fillText(chartData.length ? 'Auto-selected category vs business measure' : 'CSV category and numeric columns are required', padding, 46);
+  context.fillText(chartData.length ? 'Auto-selected category vs business measure' : 'Category and numeric columns are required', padding, 46);
 
   context.strokeStyle = 'rgba(148,163,184,.16)';
   context.lineWidth = 1;
@@ -692,7 +776,7 @@ function assistantContextReady() {
 
 function buildAssistantAnswer(question) {
   if (!assistantContextReady()) {
-    return 'Run the sample or upload CSV files first, then I can answer using detected columns, quality checks, KPIs, relationships, and chart results from the static browser-side summary.';
+    return 'Run the sample or upload data files first, then I can answer using detected columns, quality checks, KPIs, relationships, and chart results from the static browser-side summary.';
   }
 
   const lowerQuestion = question.toLowerCase();
@@ -701,7 +785,7 @@ function buildAssistantAnswer(question) {
     ? `${activeDatasetRelationships[0].leftDataset} connects with ${activeDatasetRelationships[0].rightDataset} on ${activeDatasetRelationships[0].leftHeader} with ${activeDatasetRelationships[0].confidence}% overlap`
     : activeDatasets.length > 1
       ? 'multiple files were uploaded, but no strong shared-key match was detected'
-      : 'upload more than one CSV to discover cross-dataset join relationships';
+      : 'upload more than one data file to discover cross-dataset join relationships';
   const kpiText = activeAnalysis.monthlyKpis
     ? `latest ${activeAnalysis.monthlyKpis.measureColumn} for ${activeAnalysis.monthlyKpis.latestMonth} is ${formatCompactNumber(activeAnalysis.monthlyKpis.latestValue)}, with ${activeAnalysis.monthlyKpis.momChange === null ? 'no prior month comparison' : `${activeAnalysis.monthlyKpis.momChange.toFixed(1)}% month-over-month change`}`
     : 'monthly KPI needs one usable date column and one numeric business measure';
@@ -752,7 +836,7 @@ function addAssistantMessage(role, text) {
 
 function addUploadSummaryMessage(fileCount) {
   if (!assistantContextReady()) return;
-  const sourceText = fileCount === 1 ? '1 CSV file' : `${fileCount} CSV files`;
+  const sourceText = fileCount === 1 ? '1 data file' : `${fileCount} data files`;
   const chartText = activeAnalysis.chartData.length
     ? `${activeAnalysis.chartData[0].label} is the top chart segment`
     : 'no category-plus-number chart could be created';
@@ -810,7 +894,7 @@ function renderInsights(dataset, cleaned, analysis, datasetRelationships = []) {
     } else if (activeDatasets.length > 1) {
       datasetRelationshipSummary.textContent = 'No shared key with matching values was found across the uploaded files.';
     } else {
-      datasetRelationshipSummary.textContent = 'Upload multiple CSV files to detect shared keys and value overlap.';
+      datasetRelationshipSummary.textContent = 'Upload multiple data files to detect shared keys and value overlap.';
     }
   }
 
@@ -843,7 +927,7 @@ function renderInsights(dataset, cleaned, analysis, datasetRelationships = []) {
       ? `${datasetRelationships.length} cross-dataset relationship signals were found; strongest join candidate is ${datasetRelationships[0].leftHeader} between ${datasetRelationships[0].leftDataset} and ${datasetRelationships[0].rightDataset}.`
       : activeDatasets.length > 1
         ? 'Multiple files were analyzed, but no matching shared-key values were detected across them.'
-        : 'Upload multiple CSV files together to run cross-dataset relationship analysis.',
+        : 'Upload multiple data files together to run cross-dataset relationship analysis.',
     `Decision readiness is ${analysis.decisionReadinessScore}/100 based on completeness, duplicates, usable rows, and analysis-ready columns.`,
     analysis.topRelationship === '-'
       ? 'No strong relationship could be calculated because the dataset needs at least two numeric fields or one category plus one numeric field.'
@@ -901,10 +985,10 @@ if (rawDataTable && cleanDataTable) {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
 
-    updateStatus('Reading CSV files');
+    updateStatus('Reading data files');
 
     try {
-      const uploadedDatasets = (await Promise.all(files.map(readCsvFile)))
+      const uploadedDatasets = (await Promise.all(files.map(readDataFile)))
         .filter(dataset => dataset.headers.length && dataset.records.length);
 
       if (!uploadedDatasets.length) {
@@ -922,7 +1006,7 @@ if (rawDataTable && cleanDataTable) {
       event.target.value = '';
     } catch (error) {
       updateStatus('Could not generate preview');
-      addAssistantMessage('assistant', 'I could not generate a static preview for that CSV. Please check that the file has a header row, comma-separated columns, and at least one data row.');
+      addAssistantMessage('assistant', 'I could not generate a static preview for that file. Please check that CSV/TSV files have headers, JSON contains records, or Excel has data on the first sheet.');
       event.target.value = '';
     }
   });
