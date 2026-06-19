@@ -407,7 +407,7 @@ async function readDataFile(file) {
       throw new Error('Excel parser is not available');
     }
 
-    const workbook = window.XLSX.read(await readAsArrayBuffer(file), { type: 'array' });
+    const workbook = window.XLSX.read(await readAsArrayBuffer(file), { type: 'array', cellDates: true });
     return {
       name: file.name,
       ...parseExcelDataset(workbook),
@@ -482,14 +482,61 @@ function detectDatasetRelationships(datasets) {
     .sort((first, second) => second.confidence - first.confidence || second.overlapCount - first.overlapCount);
 }
 
-function parseDateValue(value) {
+function excelSerialToDate(value) {
+  const serial = Number(value);
+  if (!Number.isFinite(serial) || serial < 20000 || serial > 80000) return null;
+  const utcTime = Math.round((serial - 25569) * 86400 * 1000);
+  const parsed = new Date(utcTime);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function isDateLikeColumn(header) {
+  const normalizedHeader = header.toLowerCase().replace(/[\s-]+/g, '_');
+  return /date|month|period|time|created|updated|posted|invoice_date|order_date/i.test(normalizedHeader);
+}
+
+function parseDateValue(value, options = {}) {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
   const normalized = normalizeValue(value);
-  const dateParts = normalized.match(/^(\d{2})-(\d{2})-(\d{4})$/);
-  const dateValue = dateParts
-    ? `${dateParts[3]}-${dateParts[2]}-${dateParts[1]}`
-    : normalized.replace(/\//g, '-');
+  if (!normalized) return null;
+  if (/^[+-]?\d+(\.\d+)?$/.test(normalized)) {
+    return options.allowExcelSerial ? excelSerialToDate(normalized) : null;
+  }
+  const dateParts = normalized.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  let dateValue = normalized.replace(/\//g, '-');
+  if (dateParts) {
+    const first = Number(dateParts[1]);
+    const second = Number(dateParts[2]);
+    const day = first > 12 ? first : second > 12 ? second : first;
+    const month = first > 12 ? second : second > 12 ? first : second;
+    dateValue = `${dateParts[3]}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  }
   const parsed = new Date(dateValue);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function columnUniqueRatio(records, column) {
+  const values = records.map(record => normalizeValue(record[column])).filter(Boolean);
+  if (!values.length) return 0;
+  return new Set(values.map(value => value.toLowerCase())).size / values.length;
+}
+
+function isIdentifierColumn(column, records) {
+  const normalizedColumn = column.toLowerCase().replace(/[\s-]+/g, '_');
+  const uniqueRatio = columnUniqueRatio(records, column);
+  return /(^id$|_id$|^id_|row_?id|record_?id|order|invoice|uuid|code|key|serial|number|^no$)/i.test(normalizedColumn)
+    && uniqueRatio > 0.55;
+}
+
+function isYearColumn(header, records) {
+  const normalizedHeader = header.toLowerCase().replace(/[\s-]+/g, '_');
+  if (isIdentifierColumn(header, records)) return false;
+  if (!/(^year$|fiscal_?year|calendar_?year|financial_?year)/i.test(normalizedHeader)) return false;
+
+  const years = records
+    .map(record => parseNumber(record[header]))
+    .filter(value => Number.isInteger(value) && value >= 1900 && value <= 2200);
+  return years.length / Math.max(1, records.length) >= 0.7;
 }
 
 function titleCase(value) {
@@ -501,12 +548,17 @@ function inferColumnTypes(headers, records) {
   return headers.reduce((types, header) => {
     const values = records.map(record => normalizeValue(record[header])).filter(Boolean);
     const numericCount = values.filter(value => parseNumber(value) !== null).length;
-    const dateCount = values.filter(value => parseDateValue(value) !== null).length;
+    const allowExcelSerialDate = isDateLikeColumn(header) && !isIdentifierColumn(header, records);
+    const dateCount = values.filter(value => parseDateValue(value, { allowExcelSerial: allowExcelSerialDate }) !== null).length;
 
-    if (values.length && numericCount / values.length >= 0.7) {
-      types[header] = 'number';
-    } else if (values.length && dateCount / values.length >= 0.7) {
+    if (isIdentifierColumn(header, records)) {
+      types[header] = 'identifier';
+    } else if (isYearColumn(header, records)) {
+      types[header] = 'year';
+    } else if (values.length && (dateCount / values.length >= 0.7 || (allowExcelSerialDate && dateCount / values.length >= 0.45))) {
       types[header] = 'date';
+    } else if (values.length && numericCount / values.length >= 0.7) {
+      types[header] = 'number';
     } else {
       types[header] = 'category';
     }
@@ -521,13 +573,13 @@ function identifyColumnRole(header, type, records) {
   const uniqueCount = new Set(values.map(value => value.toLowerCase())).size;
   const uniqueRatio = values.length ? uniqueCount / values.length : 0;
 
-  if (/id$|_id|code|key|uuid|number|no$/i.test(normalizedHeader) && uniqueRatio > 0.65) {
+  if (type === 'identifier' || isIdentifierColumn(header, records)) {
     return {
       role: 'Identifier',
     };
   }
 
-  if (type === 'date' || /date|month|year|time|period/i.test(normalizedHeader)) {
+  if (type === 'date' || type === 'year' || (!isIdentifierColumn(header, records) && /date|month|year|time|period/i.test(normalizedHeader))) {
     return {
       role: 'Date / Time',
     };
@@ -563,7 +615,7 @@ function identifyColumnRole(header, type, records) {
     };
   }
 
-  if (type === 'number') {
+  if (type === 'number' || type === 'year') {
     return {
       role: 'Numeric Field',
     };
@@ -586,7 +638,11 @@ function profileColumn(header, type, records) {
   const uniqueValues = new Set(filledValues.map(value => value.toLowerCase()));
   const fillRate = Math.round((filledValues.length / Math.max(1, values.length)) * 100);
 
-  if (type === 'number') {
+  if (type === 'identifier') {
+    return `Identifier field. Fill rate ${fillRate}%, ${uniqueValues.size} unique values.`;
+  }
+
+  if (type === 'number' || type === 'year') {
     const numericValues = filledValues
       .map(parseNumber)
       .filter(value => Number.isFinite(value));
@@ -603,7 +659,7 @@ function profileColumn(header, type, records) {
 
   if (type === 'date') {
     const dateValues = filledValues
-      .map(parseDateValue)
+      .map(value => parseDateValue(value, { allowExcelSerial: isDateLikeColumn(header) }))
       .filter(Boolean)
       .sort((left, right) => left - right);
     if (!dateValues.length) {
@@ -645,10 +701,10 @@ function cleanDataset(dataset) {
       const value = normalizeValue(record[header]);
       if (!value) missingCount += 1;
 
-      if (types[header] === 'number') {
+      if (types[header] === 'number' || types[header] === 'year') {
         normalizedRecord[header] = parseNumber(value);
       } else if (types[header] === 'date') {
-        const parsedDate = parseDateValue(value);
+        const parsedDate = parseDateValue(value, { allowExcelSerial: isDateLikeColumn(header) });
         normalizedRecord[header] = parsedDate ? parsedDate.toISOString().slice(0, 10) : '';
       } else {
         normalizedRecord[header] = titleCase(value);
@@ -800,18 +856,6 @@ function detectAnomalies(values) {
   return cleanValues
     .map((value, index) => ({ index, value, zScore: Math.abs((value - average) / standardDeviation) }))
     .filter(point => point.zScore >= 1.6);
-}
-
-function columnUniqueRatio(records, column) {
-  const values = records.map(record => normalizeValue(record[column])).filter(Boolean);
-  if (!values.length) return 0;
-  return new Set(values.map(value => value.toLowerCase())).size / values.length;
-}
-
-function isIdentifierColumn(column, records) {
-  const normalizedColumn = column.toLowerCase();
-  const uniqueRatio = columnUniqueRatio(records, column);
-  return /(^id$|_id$|id_|order|invoice|uuid|code|key|serial|number|^no$)/i.test(normalizedColumn) && uniqueRatio > 0.55;
 }
 
 function isUsefulCategoryColumn(column, records) {
