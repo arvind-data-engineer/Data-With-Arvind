@@ -1,0 +1,18 @@
+﻿# Python
+__pycache__/
+*.pyc
+.env
+.env.*
+venv/
+env/
+.Python
+# VS Code
+.vscode/
+# OS
+Thumbs.db
+.DS_Store
+.venv/
+reports/
+eda_reports/
+datasets/*
+!datasets/.gitkeep
