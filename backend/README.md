@@ -1,22 +1,19 @@
 # Data With Arvind Backend API
 
-A FastAPI backend to store visitor project requests in SQL Server.
+A FastAPI backend to store visitor project requests in PostgreSQL.
 
 ## Setup Instructions
 
-### 1. Install SQL Server
+### 1. Install PostgreSQL
 
-Install SQL Server Developer Edition, SQL Server Express, or use Azure SQL Database.
-
-Also install Microsoft ODBC Driver 18 for SQL Server.
+Install PostgreSQL locally, use Docker, or connect to a managed PostgreSQL database such as Supabase, Neon, Railway, or Azure Database for PostgreSQL.
 
 ### 2. Create Database
 
-Open SQL Server Management Studio or Azure Data Studio and run:
+Open `psql`, pgAdmin, or your database console and run:
 
 ```sql
-CREATE DATABASE [Data With Arvind];
-GO
+CREATE DATABASE data_with_arvind;
 ```
 
 The API creates the `project_requests` table automatically on startup.
@@ -32,16 +29,10 @@ pip install -r requirements.txt
 
 ### 4. Configure Environment
 
-Copy `.env.example` to `.env` and update with your database credentials:
+Copy `.env.example` to `.env` and update with your PostgreSQL credentials:
 
 ```text
-DATABASE_URL=mssql+pyodbc://sa:YOUR_PASSWORD@localhost:1433/Data%20With%20Arvind?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes
-```
-
-For Windows Authentication:
-
-```text
-DATABASE_URL=mssql+pyodbc://@localhost/Data%20With%20Arvind?driver=ODBC+Driver+18+for+SQL+Server&trusted_connection=yes&TrustServerCertificate=yes
+DATABASE_URL=postgresql+psycopg://postgres:YOUR_PASSWORD@localhost:5432/data_with_arvind
 ```
 
 ### 5. Run the API
@@ -56,6 +47,7 @@ API will be available at `http://localhost:8000`.
 
 - **Swagger UI**: `http://localhost:8000/docs`
 - **ReDoc**: `http://localhost:8000/redoc`
+- **Health Check**: `http://localhost:8000/api/health`
 
 ## API Endpoints
 
@@ -90,6 +82,8 @@ API will be available at `http://localhost:8000`.
 
 **GET** `/api/health`
 
+Returns database connectivity status when PostgreSQL is reachable.
+
 ## Frontend Integration
 
 The contact page posts JSON to:
@@ -104,10 +98,10 @@ When the API is deployed, update the `data-api-url` attribute in `contact.html` 
 
 **Connection Error?**
 
-- Ensure SQL Server is running
+- Ensure PostgreSQL is running
 - Check `DATABASE_URL` in `.env`
 - Verify the database exists
-- Confirm Microsoft ODBC Driver 18 for SQL Server is installed
+- Confirm `psycopg[binary]` installed from `requirements.txt`
 
 **Port 8000 in use?**
 

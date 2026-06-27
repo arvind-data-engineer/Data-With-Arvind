@@ -2,25 +2,18 @@
 
 ## Quick Start
 
-Your project has a Python/FastAPI backend that stores visitor project requests in SQL Server.
+Your project has a Python/FastAPI backend that stores visitor project requests in PostgreSQL.
 
-### Step 1: Install SQL Server
+### Step 1: Install PostgreSQL
 
-Install one of these:
-
-- SQL Server Developer Edition
-- SQL Server Express
-- Azure SQL Database
-
-Also install Microsoft ODBC Driver 18 for SQL Server.
+Install PostgreSQL locally, use Docker, or connect to a managed PostgreSQL database such as Supabase, Neon, Railway, or Azure Database for PostgreSQL.
 
 ### Step 2: Create Database
 
-Open SQL Server Management Studio or Azure Data Studio and run:
+Open `psql`, pgAdmin, or your database console and run:
 
 ```sql
-CREATE DATABASE [Data With Arvind];
-GO
+CREATE DATABASE data_with_arvind;
 ```
 
 The API creates the `project_requests` table automatically when it starts.
@@ -36,16 +29,10 @@ pip install -r requirements.txt
 
 ### Step 4: Configure `.env`
 
-Copy `backend/.env.example` to `backend/.env` and update your SQL Server password:
+Copy `backend/.env.example` to `backend/.env` and update your PostgreSQL credentials:
 
 ```text
-DATABASE_URL=mssql+pyodbc://sa:YOUR_PASSWORD@localhost:1433/Data%20With%20Arvind?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes
-```
-
-For Windows Authentication, use this style instead:
-
-```text
-DATABASE_URL=mssql+pyodbc://@localhost/Data%20With%20Arvind?driver=ODBC+Driver+18+for+SQL+Server&trusted_connection=yes&TrustServerCertificate=yes
+DATABASE_URL=postgresql+psycopg://postgres:YOUR_PASSWORD@localhost:5432/data_with_arvind
 ```
 
 ### Step 5: Run API
@@ -58,7 +45,7 @@ Visit `http://localhost:8000/docs` for interactive API documentation.
 
 ### Step 6: Connect Frontend
 
-`contact.html` now posts enquiry data to:
+`contact.html` posts enquiry data to:
 
 ```text
 http://localhost:8000/api/project-requests
@@ -70,7 +57,7 @@ When you deploy the backend, update the `data-api-url` value on the contact form
 
 - **POST** `/api/project-requests` - Save a project request
 - **GET** `/api/project-requests` - Get all requests
-- **GET** `/api/health` - Check if API is running
+- **GET** `/api/health` - Check API and database connectivity
 
 ## Database Schema
 
@@ -87,12 +74,12 @@ The `project_requests` table stores:
 
 ## Troubleshooting
 
-**SQL Server Connection Error?**
+**PostgreSQL Connection Error?**
 
-- Check SQL Server is running
-- Check TCP/IP is enabled for local SQL Server connections
+- Check PostgreSQL is running
+- Verify the `data_with_arvind` database exists
 - Verify `DATABASE_URL` in `.env`
-- Confirm Microsoft ODBC Driver 18 for SQL Server is installed
+- Confirm `psycopg[binary]` installed from `requirements.txt`
 
 **Port 8000 in use?**
 

@@ -1,12 +1,20 @@
+import os
 from typing import List
 
 from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from database import Base, engine, get_db
 from models import ProjectRequest
 from schemas import ProjectRequestCreate, ProjectRequestResponse
+
+frontend_origins = [
+    origin.strip()
+    for origin in os.getenv("FRONTEND_ORIGINS", "*").split(",")
+    if origin.strip()
+]
 
 Base.metadata.create_all(bind=engine)
 
@@ -14,7 +22,7 @@ app = FastAPI(title="Data With Arvind API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=frontend_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -64,6 +72,7 @@ def delete_request(request_id: int, db: Session = Depends(get_db)):
 
 
 @app.get("/api/health")
-def health_check():
-    """Health check endpoint."""
-    return {"status": "API is running"}
+def health_check(db: Session = Depends(get_db)):
+    """Health check endpoint that verifies the database connection."""
+    db.execute(text("SELECT 1"))
+    return {"status": "API is running", "database": "connected"}

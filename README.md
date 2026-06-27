@@ -30,7 +30,7 @@ A static portfolio website for data engineering, Power BI dashboards, Python aut
 
 Open `index.html` directly in a browser. The site is static and does not require a build step.
 
-The contact form posts to the FastAPI backend at `/api/project-requests`, where visitor enquiries can be saved in SQL Server. For local testing, run the backend on `http://localhost:8000`.
+The contact form posts to the FastAPI backend at `/api/project-requests`, where visitor enquiries can be saved in PostgreSQL. For local testing, run the backend on `http://localhost:8000`.
 
 ## Run The Python EDA Tool
 
