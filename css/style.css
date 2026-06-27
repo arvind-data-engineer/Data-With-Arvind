@@ -4438,3 +4438,257 @@ main{
         padding:22px;
     }
 }
+
+/* MOBILE COMPATIBILITY PASS */
+html,
+body{
+    max-width:100%;
+    overflow-x:hidden;
+}
+
+img,
+svg,
+canvas,
+video{
+    max-width:100%;
+}
+
+@media(max-width:760px){
+    nav{
+        align-items:flex-start;
+        gap:14px;
+        padding:14px 5%;
+    }
+
+    .logo{
+        font-size:22px;
+        line-height:1.2;
+    }
+
+    .logo:before{
+        width:28px;
+        height:28px;
+    }
+
+    nav ul{
+        width:100%;
+        display:flex;
+        flex-wrap:nowrap;
+        gap:10px;
+        overflow-x:auto;
+        padding:2px 0 8px;
+        -webkit-overflow-scrolling:touch;
+        scrollbar-width:none;
+    }
+
+    nav ul::-webkit-scrollbar{
+        display:none;
+    }
+
+    nav li{
+        flex:0 0 auto;
+    }
+
+    nav a{
+        display:inline-flex;
+        min-height:40px;
+        align-items:center;
+        padding:8px 12px;
+        border-radius:8px;
+        background:rgba(15,23,42,.72);
+        border:1px solid rgba(148,163,184,.14);
+        font-size:14px;
+        white-space:nowrap;
+    }
+
+    nav .logo{
+        background:transparent;
+        border:0;
+        padding:0;
+    }
+
+    .hero,
+    .section,
+    .contact-section,
+    .page-header,
+    .project-nav{
+        padding-left:5%;
+        padding-right:5%;
+    }
+
+    .hero{
+        gap:32px;
+        padding-top:44px;
+        padding-bottom:44px;
+        text-align:left;
+    }
+
+    .hero h1,
+    .page-header h1{
+        font-size:clamp(34px,10vw,42px);
+        line-height:1.08;
+    }
+
+    .hero p,
+    .page-header p{
+        font-size:17px;
+    }
+
+    .hero-buttons{
+        align-items:stretch;
+        justify-content:flex-start;
+    }
+
+    .hero-buttons .btn-primary,
+    .hero-buttons .btn-secondary,
+    .page-header .btn-primary,
+    .cta-panel .btn-primary,
+    .forecast-paid-card .btn-primary{
+        width:100%;
+        text-align:center;
+    }
+
+    .hero-visual-strip,
+    .proof-ribbon,
+    .contact-section,
+    .featured-post,
+    .analyzer-shell,
+    .live-demo-layout,
+    .forecast-paid-card,
+    .analysis-highlights,
+    .portfolio-grid,
+    .service-grid,
+    .blog-grid,
+    .about-skill-grid,
+    .takeaway-visual,
+    .forecast-feature-grid,
+    .compare-control-grid,
+    .compare-chart-grid,
+    .compare-insight-grid,
+    .decision-grid,
+    .decision-detail-grid{
+        grid-template-columns:1fr!important;
+    }
+
+    .featured-post{
+        display:grid;
+    }
+
+    .proof-ribbon{
+        width:90%;
+        padding:20px;
+    }
+
+    .proof-metrics,
+    .portfolio-stats,
+    .stats-grid,
+    .analysis-metrics,
+    .contact-highlights,
+    .form-grid,
+    .dataset-workflow{
+        grid-template-columns:1fr!important;
+    }
+
+    .rich-dashboard-card,
+    .dashboard-card,
+    .card,
+    .service-card,
+    .project-card,
+    .blog-card,
+    .deliverable-card,
+    .contact-info,
+    .contact-form-box,
+    .cta-panel,
+    .analysis-card,
+    .analysis-chart-card,
+    .analysis-table-card,
+    .analysis-summary,
+    .forecast-paid-card,
+    .analyzer-workspace,
+    .live-demo-panel{
+        padding:22px;
+    }
+
+    .section h2,
+    .contact-info h2,
+    .contact-form-box h2,
+    .analyzer-command-bar h2{
+        font-size:clamp(28px,8vw,34px);
+        line-height:1.15;
+    }
+
+    .section-kicker,
+    .hero-tag,
+    .contact-tag{
+        max-width:100%;
+        white-space:normal;
+    }
+
+    .project-nav ul{
+        flex-wrap:nowrap;
+        overflow-x:auto;
+        padding-bottom:10px;
+    }
+
+    .project-nav li{
+        flex:0 0 auto;
+    }
+
+    .footer{
+        padding-left:5%;
+        padding-right:5%;
+    }
+
+    .footer-main,
+    .footer-bottom{
+        grid-template-columns:1fr!important;
+        align-items:flex-start;
+    }
+}
+
+@media(max-width:420px){
+    .hero,
+    .section,
+    .contact-section,
+    .page-header{
+        padding-left:18px;
+        padding-right:18px;
+    }
+
+    .logo{
+        font-size:20px;
+    }
+
+    .hero h1,
+    .page-header h1{
+        font-size:32px;
+    }
+
+    .hero p,
+    .page-header p,
+    .card p,
+    .contact-form input,
+    .contact-form textarea,
+    .contact-form select{
+        font-size:16px;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .contact-form button{
+        width:100%;
+        padding:14px 18px;
+        text-align:center;
+    }
+
+    .chart-track,
+    .chart-labels{
+        grid-template-columns:40px repeat(6,minmax(18px,1fr));
+        gap:8px;
+    }
+
+    .analysis-preview-table,
+    .demo-table{
+        min-width:560px;
+    }
+}
