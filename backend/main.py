@@ -10,7 +10,7 @@ from schemas import ProjectRequestCreate, ProjectRequestResponse
 
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Commercial Website API", version="1.0.0")
+app = FastAPI(title="Data With Arvind API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,7 +23,7 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to Commercial Website API"}
+    return {"message": "Welcome to Data With Arvind API"}
 
 
 @app.post("/api/project-requests", response_model=ProjectRequestResponse)

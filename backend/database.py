@@ -8,7 +8,7 @@ load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "mssql+pyodbc://sa:password@localhost:1433/commercial_website?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes",
+    "mssql+pyodbc://sa:password@localhost:1433/Data%20With%20Arvind?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes",
 )
 
 engine = create_engine(DATABASE_URL, echo=False, pool_pre_ping=True)

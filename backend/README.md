@@ -1,4 +1,4 @@
-# Commercial Website Backend API
+# Data With Arvind Backend API
 
 A FastAPI backend to store visitor project requests in SQL Server.
 
@@ -15,7 +15,7 @@ Also install Microsoft ODBC Driver 18 for SQL Server.
 Open SQL Server Management Studio or Azure Data Studio and run:
 
 ```sql
-CREATE DATABASE commercial_website;
+CREATE DATABASE [Data With Arvind];
 GO
 ```
 
@@ -35,13 +35,13 @@ pip install -r requirements.txt
 Copy `.env.example` to `.env` and update with your database credentials:
 
 ```text
-DATABASE_URL=mssql+pyodbc://sa:YOUR_PASSWORD@localhost:1433/commercial_website?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes
+DATABASE_URL=mssql+pyodbc://sa:YOUR_PASSWORD@localhost:1433/Data%20With%20Arvind?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes
 ```
 
 For Windows Authentication:
 
 ```text
-DATABASE_URL=mssql+pyodbc://@localhost/commercial_website?driver=ODBC+Driver+18+for+SQL+Server&trusted_connection=yes&TrustServerCertificate=yes
+DATABASE_URL=mssql+pyodbc://@localhost/Data%20With%20Arvind?driver=ODBC+Driver+18+for+SQL+Server&trusted_connection=yes&TrustServerCertificate=yes
 ```
 
 ### 5. Run the API
