@@ -1,41 +1,32 @@
 # Commercial Website Backend API
 
-A FastAPI backend to store visitor project requests in a PostgreSQL database.
+A FastAPI backend to store visitor project requests in SQL Server.
 
 ## Setup Instructions
 
-### 1. Install PostgreSQL
+### 1. Install SQL Server
 
-**Windows:**
-- Download from: https://www.postgresql.org/download/windows/
-- During setup, remember the password you set for `postgres` user
-- Default port: 5432
+Install SQL Server Developer Edition, SQL Server Express, or use Azure SQL Database.
 
-**macOS:**
-```bash
-brew install postgresql
-```
-
-**Linux (Ubuntu):**
-```bash
-sudo apt-get install postgresql postgresql-contrib
-```
+Also install Microsoft ODBC Driver 18 for SQL Server.
 
 ### 2. Create Database
 
-Open PostgreSQL shell and run:
+Open SQL Server Management Studio or Azure Data Studio and run:
 
 ```sql
 CREATE DATABASE commercial_website;
+GO
 ```
+
+The API creates the `project_requests` table automatically on startup.
 
 ### 3. Install Python Dependencies
 
-```bash
+```powershell
 cd backend
 python -m venv venv
-venv\Scripts\activate  # Windows
-source venv/bin/activate  # macOS/Linux
+.\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
@@ -43,26 +34,33 @@ pip install -r requirements.txt
 
 Copy `.env.example` to `.env` and update with your database credentials:
 
+```text
+DATABASE_URL=mssql+pyodbc://sa:YOUR_PASSWORD@localhost:1433/commercial_website?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes
 ```
-DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/commercial_website
+
+For Windows Authentication:
+
+```text
+DATABASE_URL=mssql+pyodbc://@localhost/commercial_website?driver=ODBC+Driver+18+for+SQL+Server&trusted_connection=yes&TrustServerCertificate=yes
 ```
 
 ### 5. Run the API
 
-```bash
+```powershell
 uvicorn main:app --reload --port 8000
 ```
 
-API will be available at: `http://localhost:8000`
+API will be available at `http://localhost:8000`.
 
 ### 6. View API Documentation
 
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+- **Swagger UI**: `http://localhost:8000/docs`
+- **ReDoc**: `http://localhost:8000/redoc`
 
 ## API Endpoints
 
 ### Save a Project Request
+
 **POST** `/api/project-requests`
 
 ```json
@@ -77,45 +75,49 @@ API will be available at: `http://localhost:8000`
 ```
 
 ### Get All Requests
+
 **GET** `/api/project-requests`
 
 ### Get Single Request
+
 **GET** `/api/project-requests/{id}`
 
 ### Delete Request
+
 **DELETE** `/api/project-requests/{id}`
 
 ### Health Check
+
 **GET** `/api/health`
 
 ## Frontend Integration
 
-The static contact page currently posts to FormSubmit for email delivery. To use this API instead, update `contact.html` with JavaScript that sends the form data to your deployed API.
+The contact page posts JSON to:
 
-Example:
-```javascript
-const response = await fetch('http://localhost:8000/api/project-requests', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(formData)
-});
+```text
+http://localhost:8000/api/project-requests
 ```
+
+When the API is deployed, update the `data-api-url` attribute in `contact.html` to the production API URL.
 
 ## Troubleshooting
 
 **Connection Error?**
-- Ensure PostgreSQL is running
+
+- Ensure SQL Server is running
 - Check `DATABASE_URL` in `.env`
-- Verify database exists
+- Verify the database exists
+- Confirm Microsoft ODBC Driver 18 for SQL Server is installed
 
 **Port 8000 in use?**
-```bash
+
+```powershell
 uvicorn main:app --reload --port 8001
 ```
 
 ## Next Steps
 
-- Add authentication (JWT tokens)
+- Add admin authentication
 - Add email notifications
-- Deploy to Heroku, Railway, or AWS
-- Connect a admin dashboard
+- Deploy the API
+- Connect an admin dashboard

@@ -8,10 +8,10 @@ load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://postgres:password@localhost:5432/commercial_website",
+    "mssql+pyodbc://sa:password@localhost:1433/commercial_website?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes",
 )
 
-engine = create_engine(DATABASE_URL, echo=False)
+engine = create_engine(DATABASE_URL, echo=False, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

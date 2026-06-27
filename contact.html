@@ -74,10 +74,7 @@ Share a little about your current data challenge and I will help you turn it int
 <h2>Send A Message</h2>
 <p class="form-intro">A few details help me understand the scope before we talk.</p>
 
-<form class="contact-form" action="https://formsubmit.co/data_with_arvind@gmail.com" method="post">
-<input type="hidden" name="_subject" value="New project request from Data With Arvind">
-<input type="hidden" name="_template" value="table">
-<input type="hidden" name="_captcha" value="false">
+<form class="contact-form" data-api-url="http://localhost:8000/api/project-requests">
 <div class="form-grid">
 <div class="form-field">
 <label for="name">Your Name</label>
@@ -127,22 +124,22 @@ Share a little about your current data challenge and I will help you turn it int
 
 <section class="section section-alt submissions-section" aria-labelledby="submissions-title">
 <span class="section-kicker">Message Delivery</span>
-<h2 id="submissions-title">Requests Go Directly To Email</h2>
-<p class="form-intro">The form now uses a static form service, so submissions can reach your inbox after you activate the email confirmation from the first test submission.</p>
+<h2 id="submissions-title">Requests Save To Database</h2>
+<p class="form-intro">The contact form sends each enquiry to the backend API so it can be stored in SQL Server.</p>
 <div class="grid">
 <article class="card deliverable-card">
-<h3>Email Notification</h3>
-<p>Each project request is sent to data_with_arvind@gmail.com with the visitor's details.</p>
+<h3>SQL Server Storage</h3>
+<p>Each project request is saved with the visitor's name, email, project type, timeline, budget, and message.</p>
 </article>
 
 <article class="card deliverable-card">
-<h3>Static Hosting Ready</h3>
-<p>This works on Netlify, GitHub Pages, Vercel, or any static hosting provider.</p>
+<h3>API Connected</h3>
+<p>The website posts to the FastAPI backend endpoint at <strong>/api/project-requests</strong>.</p>
 </article>
 
 <article class="card deliverable-card">
-<h3>No Browser-Only Storage</h3>
-<p>Requests are no longer shown only inside one visitor's browser.</p>
+<h3>Customer Records</h3>
+<p>New enquiries create database records that can later power an admin dashboard or CRM workflow.</p>
 </article>
 </div>
 </section>
@@ -219,5 +216,49 @@ Share a little about your current data challenge and I will help you turn it int
 
 <a href="https://wa.me/918861333476" class="whatsapp-btn" aria-label="Chat on WhatsApp"><img src="images/icon-whatsapp.svg" alt="" aria-hidden="true"><span>WhatsApp</span></a>
 
+<script>
+const contactForm = document.querySelector('.contact-form');
+const submissionStatus = document.getElementById('submission-status');
+
+if (contactForm && submissionStatus) {
+  contactForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const submitButton = contactForm.querySelector('button[type="submit"]');
+    const formData = new FormData(contactForm);
+    const payload = {
+      name: formData.get('name'),
+      email: formData.get('email'),
+      project_type: formData.get('project-type'),
+      message: formData.get('message'),
+      timeline: formData.get('timeline') || null,
+      budget: formData.get('budget') || null
+    };
+
+    submissionStatus.hidden = false;
+    submissionStatus.textContent = 'Sending your enquiry...';
+    submitButton.disabled = true;
+
+    try {
+      const response = await fetch(contactForm.dataset.apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error('Request failed');
+      }
+
+      contactForm.reset();
+      submissionStatus.textContent = 'Thanks. Your enquiry has been saved and I will reply soon.';
+    } catch (error) {
+      submissionStatus.textContent = 'Could not save the enquiry right now. Please email data_with_arvind@gmail.com or try again later.';
+    } finally {
+      submitButton.disabled = false;
+    }
+  });
+}
+</script>
 </body>
 </html>

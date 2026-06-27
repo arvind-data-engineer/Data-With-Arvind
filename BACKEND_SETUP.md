@@ -2,40 +2,69 @@
 
 ## Quick Start
 
-Your project now has a Python/FastAPI backend to store visitor project requests in PostgreSQL.
+Your project has a Python/FastAPI backend that stores visitor project requests in SQL Server.
 
-### Step 1: Install PostgreSQL
-Download from https://www.postgresql.org/download/windows/ (Windows)
+### Step 1: Install SQL Server
+
+Install one of these:
+
+- SQL Server Developer Edition
+- SQL Server Express
+- Azure SQL Database
+
+Also install Microsoft ODBC Driver 18 for SQL Server.
 
 ### Step 2: Create Database
-Open PostgreSQL shell:
+
+Open SQL Server Management Studio or Azure Data Studio and run:
+
 ```sql
 CREATE DATABASE commercial_website;
+GO
 ```
 
+The API creates the `project_requests` table automatically when it starts.
+
 ### Step 3: Setup Backend
-```bash
+
+```powershell
 cd backend
 python -m venv venv
-venv\Scripts\activate
+.\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
-### Step 4: Configure .env
-Copy `.env.example` to `.env` and add your PostgreSQL password:
+### Step 4: Configure `.env`
+
+Copy `backend/.env.example` to `backend/.env` and update your SQL Server password:
+
+```text
+DATABASE_URL=mssql+pyodbc://sa:YOUR_PASSWORD@localhost:1433/commercial_website?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes
 ```
-DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/commercial_website
+
+For Windows Authentication, use this style instead:
+
+```text
+DATABASE_URL=mssql+pyodbc://@localhost/commercial_website?driver=ODBC+Driver+18+for+SQL+Server&trusted_connection=yes&TrustServerCertificate=yes
 ```
 
 ### Step 5: Run API
-```bash
+
+```powershell
 uvicorn main:app --reload --port 8000
 ```
 
-Visit http://localhost:8000/docs for interactive API documentation.
+Visit `http://localhost:8000/docs` for interactive API documentation.
 
-### Step 6: Connect The Frontend Later
-The published contact form currently uses FormSubmit for static email delivery. If you decide to use this FastAPI backend instead, update `contact.html` to submit JSON to `/api/project-requests` from your deployed API URL.
+### Step 6: Connect Frontend
+
+`contact.html` now posts enquiry data to:
+
+```text
+http://localhost:8000/api/project-requests
+```
+
+When you deploy the backend, update the `data-api-url` value on the contact form to your live API URL.
 
 ## API Endpoints
 
@@ -46,6 +75,7 @@ The published contact form currently uses FormSubmit for static email delivery. 
 ## Database Schema
 
 The `project_requests` table stores:
+
 - `id` - Primary key
 - `name` - Visitor name
 - `email` - Visitor email
@@ -57,23 +87,27 @@ The `project_requests` table stores:
 
 ## Troubleshooting
 
-**PostgreSQL Connection Error?**
-- Check PostgreSQL is running
-- Verify DATABASE_URL in .env matches your setup
+**SQL Server Connection Error?**
+
+- Check SQL Server is running
+- Check TCP/IP is enabled for local SQL Server connections
+- Verify `DATABASE_URL` in `.env`
+- Confirm Microsoft ODBC Driver 18 for SQL Server is installed
 
 **Port 8000 in use?**
-```bash
+
+```powershell
 uvicorn main:app --reload --port 8001
 ```
 
 **ModuleNotFoundError?**
-- Ensure virtual environment is activated
+
+- Ensure the virtual environment is activated
 - Run `pip install -r requirements.txt` again
 
 ## Next Steps
 
-After testing locally:
-1. Add JWT authentication
-2. Create admin dashboard
-3. Deploy to Heroku/Railway/AWS
-4. Setup email notifications
+1. Add JWT authentication for admin-only enquiry access
+2. Create an admin dashboard
+3. Deploy the API
+4. Add email notifications after database save
